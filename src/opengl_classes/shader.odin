@@ -130,7 +130,7 @@ compile_shaders :: proc(sh: ^Shader) {
     op.GetProgramiv(sh.program, op.LINK_STATUS, &succesful)
     if succesful == 0 {
         op.GetProgramInfoLog(sh.program, 512, nil, &gl_info_log[0])
-        fmt.printf("\nERROR :: SHADER LINKING FAILED :: %s", &gl_info_log[0])
+        fmt.printf("\nERROR :: SHADER LINKING FAILED :: %s\n", &gl_info_log[0])
     }
 
     sh.compiled = true
