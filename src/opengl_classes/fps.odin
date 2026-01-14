@@ -1,10 +1,8 @@
 package opengl_classes
 
 import gl "vendor:glfw"
-import "core:strings"
 import "core:time"
 import "core:fmt"
-import "core:mem"
 
 MAX_FPS : i64 : 65;
 PRINT_FPS : bool : true;
