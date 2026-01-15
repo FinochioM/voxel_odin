@@ -1,5 +1,7 @@
 package core
 
+import "base:runtime"
+
 import m "core:math/linalg/glsl"
 
 Camera :: struct {
@@ -20,6 +22,21 @@ Camera_State :: struct {
     first_move : bool,
     sens, prev_mx, prev_my, yaw, pitch: f32,
 }
+
+cam_state_init :: proc() -> Camera_State {
+    cm : Camera_State
+
+    cm.first_move = false
+    cm.sens = 0.005
+    cm.prev_mx = 0.0
+    cm.prev_my = 0.0
+    cm.yaw = 0.0
+    cm.pitch = 0.0
+
+    return cm
+}
+
+CM := cam_state_init()
 
 camera_init :: proc(fov, aspect, zNear, zFar: f32) -> Camera {
     c : Camera
@@ -43,6 +60,49 @@ camera_init :: proc(fov, aspect, zNear, zFar: f32) -> Camera {
 
 camera_destroy :: proc() {
     // none
+}
+
+camera_update_on_movement :: proc(c: ^Camera, xpos, ypos: f64) {
+    using m
+
+    context = runtime.default_context()
+
+    x := f32(xpos)
+    y := -f32(ypos)
+
+        x_diff := x - CM.prev_mx
+    y_diff := y - CM.prev_my
+
+    if CM.first_move == false {
+        CM.first_move = true
+        CM.prev_mx = x
+        CM.prev_my = y
+    }
+
+    x_diff = x_diff * CM.sens
+    y_diff = y_diff * CM.sens
+
+    CM.prev_mx = x
+    CM.prev_my = y
+
+    CM.yaw = CM.yaw + x_diff
+    CM.pitch = CM.pitch + y_diff
+
+    if CM.pitch > 89.0 {
+        CM.pitch = 89.0
+    }
+
+    if CM.pitch < -89.0 {
+        CM.pitch = -89.0
+    }
+
+    front : vec3
+
+    front.x = cos(CM.pitch) * cos(CM.yaw)
+    front.y = sin(CM.pitch)
+    front.z = cos(CM.pitch) * sin(CM.yaw)
+
+    camera_set_front(c, front)
 }
 
 camera_set_position :: proc(c: ^Camera, position: m.vec3) {

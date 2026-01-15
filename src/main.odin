@@ -91,7 +91,7 @@ size_callback :: proc "c"(window: glfw.WindowHandle, width, height: i32) {
 process_input :: proc(window: glfw.WindowHandle) {
     using co, m
 
-    camera_speed : f32 = 0.1
+    camera_speed : f32 = 0.25
 
     if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
         glfw.SetWindowShouldClose(window, true)
@@ -122,54 +122,10 @@ process_input :: proc(window: glfw.WindowHandle) {
     }
 }
 
-cam_state := co.Camera_State{
-    first_move = false,
-    sens = 0.005,
-    prev_mx = 0.0,
-    prev_my = 0.0,
-    yaw = 0.0,
-    pitch = 0.0,
-}
-
 camera_move :: proc "c"(window: glfw.WindowHandle, xpos, ypos: f64) {
-    using co, m
+    using co
 
     context = runtime.default_context()
 
-    x := f32(xpos)
-    y := -f32(ypos)
-
-    x_diff := x - cam_state.prev_mx
-    y_diff := y - cam_state.prev_my
-
-    if cam_state.first_move == false {
-        cam_state.first_move = true
-        cam_state.prev_mx = x
-        cam_state.prev_my = y
-    }
-
-    x_diff = x_diff * cam_state.sens
-    y_diff = y_diff * cam_state.sens
-
-    cam_state.prev_mx = x
-    cam_state.prev_my = y
-
-    cam_state.yaw = cam_state.yaw + x_diff
-    cam_state.pitch = cam_state.pitch + y_diff
-
-    if cam_state.pitch > 89.0 {
-        cam_state.pitch = 89.0
-    }
-
-    if cam_state.pitch < -89.0 {
-        cam_state.pitch = -89.0
-    }
-
-    front : vec3
-
-    front.x = cos(cam_state.pitch) * cos(cam_state.yaw)
-    front.y = sin(cam_state.pitch)
-    front.z = cos(cam_state.pitch) * sin(cam_state.yaw)
-
-    camera_set_front(&camera, front)
+    camera_update_on_movement(&camera, xpos, ypos)
 }
