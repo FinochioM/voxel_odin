@@ -8,6 +8,7 @@ import m "core:math/linalg/glsl"
 
 import "vendor:glfw"
 import op "vendor:OpenGL"
+import runtime "base:runtime"
 
 WIDTH :: 800
 HEIGHT :: 600
@@ -17,6 +18,8 @@ GL_MINOR_VERSION :: 3
 cameraPos := m.vec3{0.0, 0.0, 3.0}
 caneraFront := m.vec3{0.0, 0.0, -1.0}
 caneraUp := m.vec3{0.0, 1.0, 0.0}
+
+camera : co.Camera = co.camera_init(45.0, f32(WIDTH) / f32(HEIGHT), 0.1, 100.0)
 
 main :: proc() {
     using op, m, co, opcl
@@ -41,19 +44,20 @@ main :: proc() {
 
     glfw.SwapInterval(1)
 
+    glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+    glfw.SetCursorPosCallback(window, camera_move)
+
     Enable(op.DEPTH_TEST) // enable depth
 
     texture : Texture
     texture = texture_init()
     create_texture(&texture, "src/resources/grass_block.png", RGBA, TEXTURE_2D, NEAREST, NEAREST, REPEAT, REPEAT, texture.tex_coords, true)
-    
+
     projection := mat4(1.0)
     projection = mat4Perspective(45.0, f32(WIDTH) / f32(HEIGHT), 0.1, 100.0)
     cb : Cube_Renderer
     cb = cube_renderer_init()
 
-    camera : Camera
-    camera = camera_init(45.0, f32(WIDTH) / f32(HEIGHT), 0.1, 100.0)
 
     angle : f32
     block_count := 16
@@ -77,12 +81,95 @@ main :: proc() {
 }
 
 size_callback :: proc "c"(window: glfw.WindowHandle, width, height: i32) {
-    using op
+    using op, co
+    context = runtime.default_context()
+
     Viewport(0, 0, width, height)
+    camera_set_aspect(&camera, f32(width) / f32(height))
 }
 
 process_input :: proc(window: glfw.WindowHandle) {
+    using co, m
+
+    camera_speed : f32 = 0.1
+
     if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
         glfw.SetWindowShouldClose(window, true)
     }
+
+    if glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS {
+       change_position(&camera, get_front(&camera) * vec3{camera_speed, camera_speed, camera_speed})
+    }
+
+    if glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS {
+        change_position(&camera, -(get_front(&camera) * vec3{camera_speed, camera_speed, camera_speed}))
+    }
+
+    if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS {
+        change_position(&camera, -(get_right(&camera) * vec3{camera_speed, camera_speed, camera_speed}))
+    }
+
+    if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS {
+        change_position(&camera, get_right(&camera) * vec3{camera_speed, camera_speed, camera_speed})
+    }
+
+    if glfw.GetKey(window, glfw.KEY_SPACE) == glfw.PRESS {
+        change_position(&camera, get_up(&camera) * vec3{camera_speed, camera_speed, camera_speed})
+    }
+
+    if glfw.GetKey(window, glfw.KEY_LEFT_SHIFT) == glfw.PRESS {
+        change_position(&camera, -(get_up(&camera) * vec3{camera_speed, camera_speed, camera_speed}))
+    }
+}
+
+cam_state := co.Camera_State{
+    first_move = false,
+    sens = 0.005,
+    prev_mx = 0.0,
+    prev_my = 0.0,
+    yaw = 0.0,
+    pitch = 0.0,
+}
+
+camera_move :: proc "c"(window: glfw.WindowHandle, xpos, ypos: f64) {
+    using co, m
+
+    context = runtime.default_context()
+
+    x := f32(xpos)
+    y := -f32(ypos)
+
+    x_diff := x - cam_state.prev_mx
+    y_diff := y - cam_state.prev_my
+
+    if cam_state.first_move == false {
+        cam_state.first_move = true
+        cam_state.prev_mx = x
+        cam_state.prev_my = y
+    }
+
+    x_diff = x_diff * cam_state.sens
+    y_diff = y_diff * cam_state.sens
+
+    cam_state.prev_mx = x
+    cam_state.prev_my = y
+
+    cam_state.yaw = cam_state.yaw + x_diff
+    cam_state.pitch = cam_state.pitch + y_diff
+
+    if cam_state.pitch > 89.0 {
+        cam_state.pitch = 89.0
+    }
+
+    if cam_state.pitch < -89.0 {
+        cam_state.pitch = -89.0
+    }
+
+    front : vec3
+
+    front.x = cos(cam_state.pitch) * cos(cam_state.yaw)
+    front.y = sin(cam_state.pitch)
+    front.z = cos(cam_state.pitch) * sin(cam_state.yaw)
+
+    camera_set_front(&camera, front)
 }

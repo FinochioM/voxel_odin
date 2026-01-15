@@ -16,6 +16,11 @@ Camera :: struct {
     m_ViewProjectionMatrix : m.mat4,
 }
 
+Camera_State :: struct {
+    first_move : bool,
+    sens, prev_mx, prev_my, yaw, pitch: f32,
+}
+
 camera_init :: proc(fov, aspect, zNear, zFar: f32) -> Camera {
     c : Camera
     using c, m
@@ -80,17 +85,35 @@ camera_set_perspective_matrix :: proc(c: ^Camera, fov, aspect_ratio, zNear, zFar
     camera_recalculate_projection_matrix(c)
 }
 
+camera_set_front :: proc(c: ^Camera, front: m.vec3) {
+    c.m_Front = front
+
+    camera_recalculate_view_matrix(c)
+}
+
 camera_recalculate_view_matrix :: proc(c: ^Camera) {
     using m
 
-    c.m_ViewMatrix = mat4LookAt(c.m_Position, c.m_Front + c.m_Position, c.m_Up + c.m_Position)
-    c.m_ViewMatrix = mat4Rotate(vec3{1.0, 0.5, 0.5}, c.m_Rotation)
+    c.m_ViewMatrix = mat4LookAt(c.m_Position, c.m_Front + c.m_Position, c.m_Up)
+
+    rot := mat4Rotate(vec3{1.0, 0.5, 0.5}, c.m_Rotation)
+    c.m_ViewMatrix = rot * c.m_ViewMatrix
+
+    c.m_ViewProjectionMatrix = c.m_ProjectionMatrix * c.m_ViewMatrix
 }
 
 camera_recalculate_projection_matrix :: proc(c: ^Camera) {
     using m
 
     c.m_ProjectionMatrix = mat4Perspective(c.m_Fov, c.m_Aspect, c.m_zNear, c.m_zFar)
+
+    c.m_ViewProjectionMatrix = c.m_ProjectionMatrix * c.m_ViewMatrix
+}
+
+change_position :: proc(c:^Camera, position_increment: m.vec3) {
+    c.m_Position = c.m_Position + position_increment
+
+    camera_recalculate_view_matrix(c)
 }
 
 // get
@@ -112,4 +135,16 @@ get_view_projection :: proc(c: ^Camera) -> m.mat4 {
 
 get_view_matrix :: proc(c: ^Camera) -> m.mat4 {
     return c.m_ViewMatrix
+}
+
+get_front :: proc(c: ^Camera) -> m.vec3 {
+    return c.m_Front
+}
+
+get_up :: proc(c: ^Camera) -> m.vec3 {
+    return c.m_Up
+}
+
+get_right :: proc(c: ^Camera) -> m.vec3 {
+    return m.normalize_vec3(m.cross_vec3(c.m_Front, c.m_Up))
 }
