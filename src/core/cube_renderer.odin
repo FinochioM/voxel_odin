@@ -85,7 +85,7 @@ cube_renderer_destroy :: proc(cb: ^Cube_Renderer) {
     // none
 }
 
-cube_renderer_render :: proc(cb: ^Cube_Renderer, position: m.vec3, texture: ^o.Texture, rotation: f32, projection: m.mat4, shader: ^o.Shader = nil) {
+cube_renderer_render :: proc(cb: ^Cube_Renderer, position: m.vec3, texture: ^o.Texture, rotation: f32, projection: m.mat4, view: m.mat4 = m.mat4(1.0), shader: ^o.Shader = nil) {
     using cb, o, op, m
 
     use_shader := shader

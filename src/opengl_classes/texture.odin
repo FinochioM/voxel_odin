@@ -34,7 +34,7 @@ texture_init :: proc() -> Texture {
 }
 
 texture_init_from_file :: proc(path: string, int_format: u32, type: u32, min_filter: i32, mag_filter: i32, texwrap_s: i32, texwrap_t: i32, tex_coords: [8]f32, cleanup: bool) -> Texture {
-    st.set_flip_vertically_on_load(0) // change later
+    st.set_flip_vertically_on_load(1) // change later
 
     t := texture_init()
     create_texture(&t, path, int_format, type, min_filter, mag_filter, texwrap_s, texwrap_t, tex_coords, cleanup)
