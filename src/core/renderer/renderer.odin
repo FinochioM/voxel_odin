@@ -24,7 +24,7 @@ renderer_init :: proc() -> Renderer {
     vertex_array_bind(&m_VAO)
     vertex_buffer_bind(&m_VBO)
 
-    vertex_buffer_buffer_data(&m_VBO, ut.ChunkSizeX * ut.ChunkSizeY * ut.ChunkSizeZ * size_of(ut.Vertex) * 6, nil, DYNAMIC_DRAW)
+    vertex_buffer_buffer_data(&m_VBO, (ut.ChunkSizeX * ut.ChunkSizeY * ut.ChunkSizeZ * size_of(ut.Vertex) * 6) + 10, nil, DYNAMIC_DRAW)
     vertex_attrib_pointer(&m_VBO, 0, 3, FLOAT, FALSE, 6 * size_of(f32), 0)
     vertex_attrib_pointer(&m_VBO, 1, 2, FLOAT, FALSE, 6 * size_of(f32), 3 * size_of(f32))
     vertex_attrib_pointer(&m_VBO, 2, 1, FLOAT, FALSE, 6 * size_of(f32), 5 * size_of(f32))

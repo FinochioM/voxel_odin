@@ -152,11 +152,11 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
             for z := 0; z < ChunkSizeZ; z += 1 {
                 if chunk[x][y][z].p_BlockType != .Air {
                     if x <= 0 {
-                        chunk_mesh_add_face(cm, .right, chunk[x][y][z].p_Position)
+                        //chunk_mesh_add_face(cm, .right, chunk[x][y][z].p_Position)
                         chunk_mesh_add_face(cm, .left, chunk[x][y][z].p_Position)
                     } else if x >= ChunkSizeX - 1 {
                         chunk_mesh_add_face(cm, .right, chunk[x][y][z].p_Position)
-                        chunk_mesh_add_face(cm, .left, chunk[x][y][z].p_Position)
+                        //chunk_mesh_add_face(cm, .left, chunk[x][y][z].p_Position)
                     } else {
                         if chunk[x + 1][y][z].p_BlockType == Block_Type.Air {
                             chunk_mesh_add_face(cm, .right, chunk[x][y][z].p_Position)
@@ -169,9 +169,9 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
 
                     if y <= 0 {
                         chunk_mesh_add_face(cm, .bottom, chunk[x][y][z].p_Position)
-                        chunk_mesh_add_face(cm, .top, chunk[x][y][z].p_Position)                     
+                        //chunk_mesh_add_face(cm, .top, chunk[x][y][z].p_Position)                     
                     } else if y >= ChunkSizeY - 1 {
-                        chunk_mesh_add_face(cm, .bottom, chunk[x][y][z].p_Position)
+                        //chunk_mesh_add_face(cm, .bottom, chunk[x][y][z].p_Position)
                         chunk_mesh_add_face(cm, .top, chunk[x][y][z].p_Position)   
                     } else {
                         if chunk[x][y - 1][z].p_BlockType == Block_Type.Air {
@@ -185,9 +185,9 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
                     
                     if z <= 0 {
                         chunk_mesh_add_face(cm, .backward, chunk[x][y][z].p_Position)
-                        chunk_mesh_add_face(cm, .forward, chunk[x][y][z].p_Position)
+                        //chunk_mesh_add_face(cm, .forward, chunk[x][y][z].p_Position)
                     } else if z >= ChunkSizeZ - 1 {
-                        chunk_mesh_add_face(cm, .backward, chunk[x][y][z].p_Position)
+                        //chunk_mesh_add_face(cm, .backward, chunk[x][y][z].p_Position)
                         chunk_mesh_add_face(cm, .forward, chunk[x][y][z].p_Position)
                     } else {
                         if chunk[x][y][z + 1].p_BlockType == Block_Type.Air {

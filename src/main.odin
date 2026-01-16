@@ -12,8 +12,8 @@ import "vendor:glfw"
 import op "vendor:OpenGL"
 import runtime "base:runtime"
 
-WIDTH :: 800
-HEIGHT :: 600
+WIDTH :: 1280
+HEIGHT :: 720
 GL_MAJOR_VERSION :: 3
 GL_MINOR_VERSION :: 3
 
@@ -60,7 +60,7 @@ main :: proc() {
     
     cb : Cube_Renderer = cube_renderer_init()
     chunk := new(Chunk)
-    chunk_init(chunk)
+    chunk_init(chunk, vec2{0, 0})
     ren : re.Renderer = re.renderer_init()
 
     angle : f32

@@ -7,11 +7,14 @@ import ut "utils"
 Chunk :: struct {
     m_ChunkContents: [ut.ChunkSizeX][ut.ChunkSizeY][ut.ChunkSizeZ]Block,
     m_ChunkMesh: Chunk_Mesh,
+    m_ChunkPosition: m.vec2,
 }
 
-chunk_init :: proc(c: ^Chunk) {
+chunk_init :: proc(c: ^Chunk, chunk_pos: m.vec2) {
     using ut, c
     c.m_ChunkMesh = chunk_mesh_init()
+
+    c.m_ChunkPosition = chunk_pos
 
     for i := 0; i < ChunkSizeX; i += 1 {
         for j := 0; j < ChunkSizeY; j += 1 {
