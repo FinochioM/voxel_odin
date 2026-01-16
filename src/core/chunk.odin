@@ -2,10 +2,24 @@ package core
 
 import m "core:math/linalg/glsl"
 
-import "../core"
+import ut "utils"
 
 Chunk :: struct {
-    m_ChunkContents: [16][16][16]Block
+    m_ChunkContents: [ut.ChunkSizeX][ut.ChunkSizeY][ut.ChunkSizeZ]Block,
+    m_ChunkMesh: Chunk_Mesh,
+}
+
+chunk_init :: proc(c: ^Chunk) {
+    using ut, c
+    c.m_ChunkMesh = chunk_mesh_init()
+
+    for i := 0; i < ChunkSizeX; i += 1 {
+        for j := 0; j < ChunkSizeY; j += 1 {
+            for k := 0; k < ChunkSizeZ; k += 1 {
+                m_ChunkContents[i][j][k].p_BlockType = Block_Type.Air
+            }
+        }
+    }
 }
 
 chunk_add_block :: proc(c: ^Chunk, type: Block_Type, position: m.vec3) {
@@ -19,4 +33,17 @@ chunk_add_block :: proc(c: ^Chunk, type: Block_Type, position: m.vec3) {
     z := int(position.z)
 
     c.m_ChunkContents[x][y][z] = b
+}
+
+chunk_construct :: proc(c: ^Chunk) {
+    using c
+
+    chunk_mesh_construct_mesh(&m_ChunkMesh, &m_ChunkContents)
+}
+
+//get
+get_chunk_mesh :: proc(c: ^Chunk) -> Chunk_Mesh{
+    using c
+
+    return m_ChunkMesh
 }

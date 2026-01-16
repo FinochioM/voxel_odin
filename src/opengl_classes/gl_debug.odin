@@ -4,7 +4,7 @@ import op "vendor:OpenGL"
 import "core:fmt"
 
 ERR_CODE : op.GL_Enum;
-PRINT_ERROR := "UNKOWN ERROR";
+PRINT_ERROR := "UNKNOWN ERROR";
 
 check_opengl_error :: proc(file: string, line: i32) -> op.GL_Enum {
     ERR_CODE = op.GL_Enum(op.GetError()) // GL_Enum is u64 and GetError returns u32, so cast it

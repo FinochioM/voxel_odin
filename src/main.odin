@@ -2,6 +2,8 @@ package main
 
 import opcl "opengl_classes"
 import co "core"
+import re "core/renderer"
+import ut "core/utils"
 
 import "core:fmt"
 import m "core:math/linalg/glsl"
@@ -55,14 +57,25 @@ main :: proc() {
 
     projection := mat4(1.0)
     projection = mat4Perspective(45.0, f32(WIDTH) / f32(HEIGHT), 0.1, 100.0)
-    cb : Cube_Renderer
-    cb = cube_renderer_init()
-
+    
+    cb : Cube_Renderer = cube_renderer_init()
+    chunk := new(Chunk)
+    chunk_init(chunk)
+    ren : re.Renderer = re.renderer_init()
 
     angle : f32
     block_count := 16
+    cube_address : ^f32
 
-    cube_position := vec3{0.0, 0.0, -4.0}
+    for i := 0; i < ut.ChunkSizeX; i += 1 {
+        for j := 0; j < ut.ChunkSizeY; j += 1 {
+            for k := 0; k < ut.ChunkSizeZ; k += 1 {
+                chunk_add_block(chunk, Block_Type.Dirt, vec3{f32(i), f32(j), f32(k)})
+            }
+        }
+    }
+
+    chunk_construct(chunk)
 
     for (!glfw.WindowShouldClose(window)) {
         angle += 0.1
@@ -71,7 +84,9 @@ main :: proc() {
         ClearColor(0.2, 0.3, 0.3, 1.0)
         Clear(op.COLOR_BUFFER_BIT | op.DEPTH_BUFFER_BIT)
 
-        cube_renderer_render(&cb, cube_position, &texture, 0, get_view_projection(&camera))
+        re.renderer_render_chunk(&ren, chunk, &camera)
+
+        display_frame_rate(window, "voxel engine 0.1")
 
         glfw.SwapBuffers(window)
         glfw.PollEvents()

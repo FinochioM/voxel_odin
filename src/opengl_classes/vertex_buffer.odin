@@ -31,6 +31,12 @@ vertex_buffer_buffer_data :: proc(v: ^VertexBuffer, size: int, data: rawptr, usa
     op.BufferData(v.type, size, data, usage)
 }
 
+vertex_buffer_buffer_subdata :: proc(v: ^VertexBuffer, offset: int, size: int, data: rawptr) {
+    vertex_buffer_bind(v)
+
+    op.BufferSubData(v.type, offset, size, data)
+}
+
 vertex_buffer_bind :: proc(v: ^VertexBuffer) {
     op.BindBuffer(v.type, v.buffer_id)
 }
