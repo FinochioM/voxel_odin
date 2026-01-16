@@ -71,7 +71,15 @@ main :: proc() {
         ClearColor(0.2, 0.3, 0.3, 1.0)
         Clear(op.COLOR_BUFFER_BIT | op.DEPTH_BUFFER_BIT)
 
-        cube_renderer_render(&cb, cube_position, &texture, angle, get_view_projection(&camera))
+        //cube_renderer_render(&cb, cube_position, &texture, angle, get_view_projection(&camera))
+
+        for i := 0; i < 4; i += 1 {
+            for j := 0; j < 4; j += 1 {
+                for k := 0; k < 4; k += 1 {
+                    cube_renderer_render(&cb, vec3{f32(i) + 1, f32(j) + 1, f32(k) + 1}, &texture, 0, get_view_projection(&camera))
+                }
+            }
+        }
 
         glfw.SwapBuffers(window)
         glfw.PollEvents()

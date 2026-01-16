@@ -94,12 +94,10 @@ cube_renderer_render :: proc(cb: ^Cube_Renderer, position: m.vec3, texture: ^o.T
         use_shader = &m_DefaultShader
     }
 
-    view := mat4(1.0)
     model := mat4(1.0)
 
-    view = mat4Translate(vec3{0.0, 0.0, -3.0})
     model = mat4Translate(position)
-    model = mat4Rotate(vec3{1.0, 0.5, 0.5}, rotation)
+    model = model * mat4Rotate(vec3{1.0, 0.5, 0.5}, rotation)
 
     texture_bind(texture, 0)
     shader_use(use_shader)

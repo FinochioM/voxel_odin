@@ -68,9 +68,11 @@ camera_update_on_movement :: proc(c: ^Camera, xpos, ypos: f64) {
     context = runtime.default_context()
 
     x := f32(xpos)
-    y := -f32(ypos)
+    y := f32(ypos)
+   
+    y = -y
 
-        x_diff := x - CM.prev_mx
+    x_diff := x - CM.prev_mx
     y_diff := y - CM.prev_my
 
     if CM.first_move == false {

@@ -19,7 +19,7 @@ Texture :: struct {
 texture_init :: proc() -> Texture {
     t : Texture
 
-    t.tex_coords = {1.0, 1.0, 1.0, .0, 0.0, 0.0, 0.0, 1.0}
+    t.tex_coords = {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}
     t.cleanup = true
     t.width = 0
     t.height = 0
@@ -33,7 +33,16 @@ texture_init :: proc() -> Texture {
     return t
 }
 
-texture_init_from_file :: proc(path: string, int_format: u32, type: u32, min_filter: i32, mag_filter: i32, texwrap_s: i32, texwrap_t: i32, tex_coords: [8]f32, cleanup: bool) -> Texture {
+texture_init_from_file :: proc(path: string, 
+    int_format: u32 = op.RGBA, 
+    type: u32 = op.TEXTURE_2D, 
+    min_filter: i32 = op.NEAREST, 
+    mag_filter: i32 = op.NEAREST, 
+    texwrap_s: i32 = op.REPEAT, 
+    texwrap_t: i32 = op.REPEAT, 
+    tex_coords: [8]f32 = {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}, 
+    cleanup: bool = true
+) -> Texture {
     st.set_flip_vertically_on_load(1) // change later
 
     t := texture_init()
