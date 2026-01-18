@@ -27,7 +27,7 @@ cam_state_init :: proc() -> Camera_State {
     cm : Camera_State
 
     cm.first_move = false
-    cm.sens = 0.005
+    cm.sens = 0.2
     cm.prev_mx = 0.0
     cm.prev_my = 0.0
     cm.yaw = 0.0
@@ -100,9 +100,12 @@ camera_update_on_movement :: proc(c: ^Camera, xpos, ypos: f64) {
 
     front : vec3
 
-    front.x = cos(CM.pitch) * cos(CM.yaw)
-    front.y = sin(CM.pitch)
-    front.z = cos(CM.pitch) * sin(CM.yaw)
+    pitch_r := deg_to_rad(CM.pitch)
+    yaw_r := deg_to_rad(CM.yaw)
+
+    front.x = cos(pitch_r) * cos(yaw_r)
+    front.y = sin(pitch_r)
+    front.z = cos(pitch_r) * sin(yaw_r)
 
     camera_set_front(c, front)
 }
@@ -209,4 +212,9 @@ get_up :: proc(c: ^Camera) -> m.vec3 {
 
 get_right :: proc(c: ^Camera) -> m.vec3 {
     return m.normalize_vec3(m.cross_vec3(c.m_Front, c.m_Up))
+}
+
+// helper
+deg_to_rad :: proc(x: f32) -> f32 {
+    return x * (m.PI / 180.0)
 }

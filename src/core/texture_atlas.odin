@@ -28,7 +28,7 @@ texture_atlas_init_from_file :: proc(atlas_path: string, tx, ty: i32) -> Texture
     return ta
 }
 
-texture_atlas_sample :: proc(ta: ^Texture_Atlas, start_coords, end_coords: m.vec2) -> opcl.Texture {
+texture_atlas_sample :: proc(ta: ^Texture_Atlas, start_coords, end_coords: m.vec2) -> [8]f32 {
     width, height, x2, y2, x1, y1 : f32
 
     width = f32(ta.m_TileX) * (end_coords.x - start_coords.x)
@@ -55,16 +55,10 @@ texture_atlas_sample :: proc(ta: ^Texture_Atlas, start_coords, end_coords: m.vec
     texture_coordinates[6] = x1
     texture_coordinates[7] = y2
 
-    tex := opcl.texture_init()
-
-    tex = ta.m_Atlas
-
-    opcl.create_texture_int(&tex, tex.texture, texture_coordinates, i32(width), i32(height), false)
-
-    return tex
+    return texture_coordinates
 }
 
-texture_atlas_sample_custom :: proc(ta: ^Texture_Atlas, start_coords, end_coords: m.vec2) -> opcl.Texture {
+texture_atlas_sample_custom :: proc(ta: ^Texture_Atlas, start_coords, end_coords: m.vec2) -> [8]f32 {
     width, height, x2, y2, x1, y1 : f32
 
     width = end_coords.x - start_coords.x
@@ -91,11 +85,5 @@ texture_atlas_sample_custom :: proc(ta: ^Texture_Atlas, start_coords, end_coords
     texture_coordinates[6] = x1
     texture_coordinates[7] = y2
 
-    tex := opcl.texture_init()
-
-    tex = ta.m_Atlas
-
-    opcl.create_texture_int(&tex, tex.texture, texture_coordinates, i32(width), i32(height), false)
-
-    return tex
+    return texture_coordinates
 }

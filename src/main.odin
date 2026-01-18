@@ -51,10 +51,6 @@ main :: proc() {
 
     Enable(op.DEPTH_TEST) // enable depth
 
-    texture : Texture
-    texture = texture_init()
-    create_texture(&texture, "src/resources/grass_block.png", RGBA, TEXTURE_2D, NEAREST, NEAREST, REPEAT, REPEAT, texture.tex_coords, true)
-
     projection := mat4(1.0)
     projection = mat4Perspective(45.0, f32(WIDTH) / f32(HEIGHT), 0.1, 100.0)
     
