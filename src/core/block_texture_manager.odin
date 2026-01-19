@@ -40,9 +40,9 @@ get_block_texture :: proc(block_type: Block_Type, face_type: Block_Face_Type) ->
                 case .top:
                     return dirt_block_texture[0]
                 case .left:
-                    return dirt_block_texture[1]
+                    return dirt_block_texture[2]
                 case .right:
-                    return dirt_block_texture[1]
+                    return dirt_block_texture[2]
                 case:
                     return dirt_block_texture[2]
             }

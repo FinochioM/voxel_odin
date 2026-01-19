@@ -23,6 +23,15 @@ Camera_State :: struct {
     sens, prev_mx, prev_my, yaw, pitch: f32,
 }
 
+Move_Direction :: enum {
+    Up,
+    Down,
+    Left,
+    Right,
+    Front,
+    Back,
+}
+
 cam_state_init :: proc() -> Camera_State {
     cm : Camera_State
 
@@ -60,6 +69,35 @@ camera_init :: proc(fov, aspect, zNear, zFar: f32) -> Camera {
 
 camera_destroy :: proc() {
     // none
+}
+
+camera_move :: proc(camera: ^Camera, dir: Move_Direction, speed: f32) {
+    #partial switch dir {
+        case Move_Direction.Front: {
+            change_position(camera, get_front(camera) * speed)
+            break
+        }
+        case Move_Direction.Back: {
+            change_position(camera, -get_front(camera) * speed)
+            break
+        }
+        case Move_Direction.Left: {
+            change_position(camera, -get_right(camera) * speed)
+            break
+        }
+        case Move_Direction.Right: {
+            change_position(camera, get_right(camera) * speed)
+            break
+        }
+        case Move_Direction.Up: {
+            change_position(camera, get_up(camera) * speed)
+            break
+        }
+        case Move_Direction.Down: {
+            change_position(camera, -get_up(camera) * speed)
+            break
+        }
+    }
 }
 
 camera_update_on_movement :: proc(c: ^Camera, xpos, ypos: f64) {

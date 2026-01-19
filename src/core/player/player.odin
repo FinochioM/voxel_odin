@@ -10,6 +10,14 @@ Player :: struct {
     p_World: rawptr
 }
 
+player_init :: proc() -> Player {
+    p : Player
+
+    p.p_Camera = co.camera_init(45.0, f32(1280) / f32(720), 0.1, 100.0)
+
+    return p
+}
+
 player_set_world :: proc(p: ^Player, w: rawptr) {
     p.p_World = w
 }

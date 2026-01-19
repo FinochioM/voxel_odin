@@ -30,7 +30,7 @@ chunk_mesh_init :: proc() -> Chunk_Mesh {
     vertex_array_bind(&cm.p_VAO)
     vertex_buffer_bind(&cm.p_VBO)
 
-    vertex_buffer_buffer_data(&cm.p_VBO, (ut.ChunkSizeX * ut.ChunkSizeY * ut.ChunkSizeZ * size_of(ut.Vertex) * 6) + 10, nil, DYNAMIC_DRAW)
+    vertex_buffer_buffer_data(&cm.p_VBO, (ut.ChunkSizeX * ut.ChunkSizeY * ut.ChunkSizeZ * size_of(ut.Vertex) * 6) + 16, nil, DYNAMIC_DRAW)
     vertex_attrib_pointer(&cm.p_VBO, 0, 3, FLOAT, FALSE, 6 * size_of(f32), 0)
     vertex_attrib_pointer(&cm.p_VBO, 1, 2, FLOAT, FALSE, 6 * size_of(f32), 3 * size_of(f32))
     vertex_attrib_pointer(&cm.p_VBO, 2, 1, FLOAT, FALSE, 6 * size_of(f32), 5 * size_of(f32))
@@ -161,8 +161,10 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
     _, _ = append_elems(&p_Vertices, v1, v2, v3, v4, v5, v6)
 }
 
-chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.ChunkSizeY][ut.ChunkSizeZ]Block) {
+chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.ChunkSizeY][ut.ChunkSizeZ]Block, chunk_pos: m.vec3) {
     using cm, ut
+
+    world_position : m.vec3
 
     _ = resize_dynamic_array(&p_Vertices, 0)
 
@@ -170,51 +172,51 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
         for y := 0; y < ChunkSizeY; y += 1 {
             for z := 0; z < ChunkSizeZ; z += 1 {
                 if chunk[x][y][z].p_BlockType != .Air {
+                    world_position = chunk[x][y][z].p_Position
+
+                    world_position.x = chunk_pos.x * ChunkSizeX + chunk[x][y][z].p_Position.x                    
+                    world_position.y = chunk_pos.y * ChunkSizeY + chunk[x][y][z].p_Position.y
+                    world_position.z = chunk_pos.z * ChunkSizeZ + chunk[x][y][z].p_Position.z
+
+                    if z <= 0 {
+                        chunk_mesh_add_face(cm, Block_Face_Type.backward, world_position, chunk[x][y][z].p_BlockType)
+                    } else if z >= ChunkSizeZ - 1 {
+                        chunk_mesh_add_face(cm, Block_Face_Type.front, world_position, chunk[x][y][z].p_BlockType)    
+                    } else {
+                        if chunk[x][y][z + 1].p_BlockType == Block_Type.Air {
+                            chunk_mesh_add_face(cm, Block_Face_Type.front, world_position, chunk[x][y][z].p_BlockType)    
+                        }
+
+                        if chunk[x][y][z - 1].p_BlockType == Block_Type.Air {
+                            chunk_mesh_add_face(cm, Block_Face_Type.backward, world_position, chunk[x][y][z].p_BlockType)    
+                        }
+                    }
+
                     if x <= 0 {
-                        //chunk_mesh_add_face(cm, .right, chunk[x][y][z].p_Position)
-                        chunk_mesh_add_face(cm, Block_Face_Type.left, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
+                        chunk_mesh_add_face(cm, Block_Face_Type.left, world_position, chunk[x][y][z].p_BlockType)
                     } else if x >= ChunkSizeX - 1 {
-                        chunk_mesh_add_face(cm, Block_Face_Type.right, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
-                        //chunk_mesh_add_face(cm, .left, chunk[x][y][z].p_Position)
+                        chunk_mesh_add_face(cm, Block_Face_Type.right, world_position, chunk[x][y][z].p_BlockType)
                     } else {
                         if chunk[x + 1][y][z].p_BlockType == Block_Type.Air {
-                            chunk_mesh_add_face(cm, .right, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
+                            chunk_mesh_add_face(cm, Block_Face_Type.right, world_position, chunk[x][y][z].p_BlockType)
                         }
 
                         if chunk[x - 1][y][z].p_BlockType == Block_Type.Air {
-                            chunk_mesh_add_face(cm, Block_Face_Type.left, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
+                            chunk_mesh_add_face(cm, Block_Face_Type.left, world_position, chunk[x][y][z].p_BlockType)
                         }
                     }
 
                     if y <= 0 {
-                        chunk_mesh_add_face(cm, Block_Face_Type.bottom, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
-                        //chunk_mesh_add_face(cm, .top, chunk[x][y][z].p_Position)                     
+                        chunk_mesh_add_face(cm, Block_Face_Type.bottom, world_position, chunk[x][y][z].p_BlockType)                    
                     } else if y >= ChunkSizeY - 1 {
-                        //chunk_mesh_add_face(cm, .bottom, chunk[x][y][z].p_Position)
-                        chunk_mesh_add_face(cm, Block_Face_Type.top, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)   
+                        chunk_mesh_add_face(cm, Block_Face_Type.top, world_position, chunk[x][y][z].p_BlockType)   
                     } else {
                         if chunk[x][y - 1][z].p_BlockType == Block_Type.Air {
-                            chunk_mesh_add_face(cm, Block_Face_Type.top, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
+                            chunk_mesh_add_face(cm, Block_Face_Type.bottom, world_position, chunk[x][y][z].p_BlockType)
                         }
 
                         if chunk[x][y + 1][z].p_BlockType == Block_Type.Air {
-                            chunk_mesh_add_face(cm, Block_Face_Type.bottom, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
-                        }
-                    }
-                    
-                    if z <= 0 {
-                        chunk_mesh_add_face(cm, Block_Face_Type.backward, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
-                        //chunk_mesh_add_face(cm, .forward, chunk[x][y][z].p_Position)
-                    } else if z >= ChunkSizeZ - 1 {
-                        //chunk_mesh_add_face(cm, .backward, chunk[x][y][z].p_Position)
-                        chunk_mesh_add_face(cm, Block_Face_Type.front, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
-                    } else {
-                        if chunk[x][y][z + 1].p_BlockType == Block_Type.Air {
-                            chunk_mesh_add_face(cm, Block_Face_Type.front, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
-                        }
-
-                        if chunk[x][y][z - 1].p_BlockType == Block_Type.Air {
-                            chunk_mesh_add_face(cm, Block_Face_Type.backward, chunk[x][y][z].p_Position, chunk[x][y][z].p_BlockType)
+                            chunk_mesh_add_face(cm, Block_Face_Type.top, world_position, chunk[x][y][z].p_BlockType)
                         }
                     }
                 }
@@ -223,6 +225,14 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
     }
 
     verts := cm.p_Vertices[:]
+
+    if len(verts) == 0 {
+        return
+    }
+
+    if len(cm.p_Vertices) == 0 {
+        return
+    }
 
     size := len(verts) * size_of(ut.Vertex)
     data := rawptr(&verts[0])
