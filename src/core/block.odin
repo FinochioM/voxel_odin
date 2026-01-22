@@ -5,8 +5,12 @@ import m "core:math/linalg/glsl"
 import util "../core/utils"
 
 Block_Type :: enum {
-    Dirt,
+    Dirt = 0,
     Stone,
+    Leaf,
+    Wood,
+    Cactus,
+    Water,
     Air
 }
 

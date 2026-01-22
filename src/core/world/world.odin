@@ -21,30 +21,47 @@ Chunk_Pair :: struct {
 World :: struct {
     p_Player: pl.Player,
     m_Renderer: re.Renderer,
-    m_Chunks: map[Chunk_Coord]co.Chunk,
     m_ChunkCount: i32,
-    m_WorldChunks: [16][16]co.Chunk,
+    m_WorldChunks: map[int]map[int]^co.Chunk,
 }
 
 world_init :: proc(w: ^World) {
     w.p_Player = pl.player_init()
     w.m_Renderer = re.renderer_init()
-    
+
+    w.m_WorldChunks = make(map[int]map[int]^co.Chunk)
+
+    co.camera_set_position(&w.p_Player.p_Camera, m.vec3{2 * 16, 2 * 16, 2 * 16})
+    w.p_Player.p_Position = m.vec3{2 * 16, 10 * 16, 2 * 16}
+
     ut.log_to_console("initialized world gen")
-    
-    for i := 0; i < 16; i += 1 {
-        for j := 0; j < 16; j+= 1 {
-            co.chunk_init(&w.m_WorldChunks[i][j])
-            generate_chunk(&w.m_WorldChunks[i][j])
+
+    for i := 0; i < 4; i += 1 {
+        row, ok := w.m_WorldChunks[i]
+        if !ok {
+            row = make(map[int]^co.Chunk)
+            w.m_WorldChunks[i] = row
         }
+
+        for j := 0; j < 4; j+= 1 {
+            c := new(co.Chunk)
+            co.chunk_init(c)
+            c.p_Position = m.vec3{f32(i), 1, f32(j)}
+            
+            row[j] = c
+            generate_chunk(c)
+        }
+
+        w.m_WorldChunks[i] = row
     }
 
     ut.log_to_console("ended world gen")
     ut.log_to_console("initialized chunk mesh construction")
 
-    for i := 0; i < 16; i += 1 {
-        for j := 0; j < 16; j += 1 {
-            co.chunk_construct(&w.m_WorldChunks[i][j], m.vec3{f32(i), 1, f32(j)})
+    for i := 0; i < 4; i += 1 {
+        for j := 0; j < 4; j += 1 {
+            ut.timer_init("mesh construction")
+            co.chunk_construct(w.m_WorldChunks[i][j], m.vec3{f32(i), 1, f32(j)})
         }
     }
 
@@ -56,7 +73,7 @@ world_destroy :: proc() {}
 world_on_update :: proc(w: ^World, window: glfw.WindowHandle) {
     pl.player_on_update(&w.p_Player)
 
-    camera_speed :: 0.25
+    camera_speed :: 0.35
 
     if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
         glfw.SetWindowShouldClose(window, true)
@@ -98,27 +115,29 @@ world_render_world :: proc(w: ^World) {
 
     def_pos : f32 = 1
 
-    if w.p_Player.p_Position.x < def_pos {
-        player_chunk_x = 0
-    } else {
-        player_chunk_x = int(m.ceil(w.p_Player.p_Position.x / ut.ChunkSizeX))
-    }
+    player_chunk_x = int(m.floor(w.p_Player.p_Position.x / ut.ChunkSizeX))
+    player_chunk_y = int(m.floor(w.p_Player.p_Position.y / ut.ChunkSizeY))
+    player_chunk_z = int(m.floor(w.p_Player.p_Position.z / ut.ChunkSizeZ))
 
-    if w.p_Player.p_Position.y < def_pos {
-        player_chunk_y = 0_
-    } else {
-        player_chunk_y = int(m.ceil(w.p_Player.p_Position.y / ut.ChunkSizeY))
-    }
+    /*
+    world_render_chunk_from_map(w, player_chunk_x, player_chunk_z)
+    world_render_chunk_from_map(w, player_chunk_x + 1, player_chunk_z)
+    world_render_chunk_from_map(w, player_chunk_x, player_chunk_z + 1)
 
-    if w.p_Player.p_Position.z < def_pos {
-        player_chunk_z = 0
-    } else {
-        player_chunk_z = int(m.ceil(w.p_Player.p_Position.z / ut.ChunkSizeZ))
-    }
+    world_render_chunk_from_map(w, player_chunk_x - 1, player_chunk_z)
+    world_render_chunk_from_map(w, player_chunk_x - 1, player_chunk_z + 1)
+    world_render_chunk_from_map(w, player_chunk_x, player_chunk_z - 1)
+    world_render_chunk_from_map(w, player_chunk_x + 1, player_chunk_z + 1)
+    world_render_chunk_from_map(w, player_chunk_x + 1, player_chunk_z - 1)
+    world_render_chunk_from_map(w, player_chunk_x - 1, player_chunk_z - 1)
+    world_render_chunk_from_map(w, player_chunk_x - 1, player_chunk_z + 1)
+    */
 
-    for i := 0; i < 4; i += 1 {
-        for j := 0; j < 4; j += 1 {
-            re.renderer_render_chunk(&w.m_Renderer, &w.m_WorldChunks[i][j], &w.p_Player.p_Camera)
+    render_distance_x, render_distance_z := 4, 4
+
+    for i := player_chunk_z - render_distance_z; i < player_chunk_z + render_distance_z; i += 1 {
+        for j := player_chunk_x - render_distance_x; j < player_chunk_x + render_distance_x; j += 1 {
+            world_render_chunk_from_map(w, j, i)
         }
     }
 }
@@ -127,4 +146,32 @@ world_on_event :: proc(w: ^World, e: ev.Event) {
     if e.type == ev.Event_Types.MouseMove {
         co.camera_update_on_movement(&w.p_Player.p_Camera, e.mx, e.my)
     }
+}
+
+world_render_chunk_from_map :: proc(w: ^World, cx, cz: int) {
+    row, xOk := w.m_WorldChunks[cx]
+    if xOk {
+        c, zOk := row[cz]
+        if zOk && c != nil {
+            re.renderer_render_chunk(&w.m_Renderer, c, &w.p_Player.p_Camera)
+            return
+        }
+    }
+
+    if !xOk {
+        row = make(map[int]^co.Chunk)
+        w.m_WorldChunks[cx] = row
+    }
+
+    c := new(co.Chunk)
+    co.chunk_init(c)
+    
+    c.p_Position = m.vec3{f32(cx), 1, f32(cz)}
+    generate_chunk(c)
+    co.chunk_construct(c, m.vec3{f32(cx), 1, f32(cz)})
+
+    row[cz] = c
+    w.m_WorldChunks[cx] = row
+
+    re.renderer_render_chunk(&w.m_Renderer, c, &w.p_Player.p_Camera)
 }

@@ -30,7 +30,9 @@ chunk_mesh_init :: proc() -> Chunk_Mesh {
     vertex_array_bind(&cm.p_VAO)
     vertex_buffer_bind(&cm.p_VBO)
 
-    vertex_buffer_buffer_data(&cm.p_VBO, (ut.ChunkSizeX * ut.ChunkSizeY * ut.ChunkSizeZ * size_of(ut.Vertex) * 6) + 16, nil, DYNAMIC_DRAW)
+    //chunk_surface_area := (2 * ut.ChunkSizeX * ut.ChunkSizeZ) + (2 * ut.ChunkSizeX * ut.ChunkSizeY) + (2 * ut.ChunkSizeY * ut.ChunkSizeZ)
+
+    //vertex_buffer_buffer_data(&cm.p_VBO, ut.ChunkSizeX * ut.ChunkSizeY * ut.ChunkSizeZ * size_of(ut.Vertex) * 36, nil, DYNAMIC_DRAW)
     vertex_attrib_pointer(&cm.p_VBO, 0, 3, FLOAT, FALSE, 6 * size_of(f32), 0)
     vertex_attrib_pointer(&cm.p_VBO, 1, 2, FLOAT, FALSE, 6 * size_of(f32), 3 * size_of(f32))
     vertex_attrib_pointer(&cm.p_VBO, 2, 1, FLOAT, FALSE, 6 * size_of(f32), 5 * size_of(f32))
@@ -164,9 +166,9 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
 chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.ChunkSizeY][ut.ChunkSizeZ]Block, chunk_pos: m.vec3) {
     using cm, ut
 
-    world_position : m.vec3
-
     _ = resize_dynamic_array(&p_Vertices, 0)
+    
+    world_position : m.vec3
 
     for x := 0; x < ChunkSizeX; x += 1 {
         for y := 0; y < ChunkSizeY; y += 1 {
@@ -237,5 +239,6 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
     size := len(verts) * size_of(ut.Vertex)
     data := rawptr(&verts[0])
 
-    opcl.vertex_buffer_buffer_subdata(&cm.p_VBO, 0, size, data)
+    //opcl.vertex_buffer_buffer_subdata(&cm.p_VBO, 0, size, data)
+    opcl.vertex_buffer_buffer_data(&cm.p_VBO, size, data, op.STATIC_DRAW)
 }

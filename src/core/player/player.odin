@@ -23,7 +23,7 @@ player_set_world :: proc(p: ^Player, w: rawptr) {
 }
 
 player_on_update :: proc(p: ^Player) {
-
+    p.p_Position = co.get_position(&p.p_Camera)
 }
 
 player_on_event :: proc(p: ^Player) {
