@@ -19,7 +19,7 @@ renderer_init :: proc() -> Renderer {
     r : Renderer
     using r, opcl, op
 
-    m_DefaultShader = shader_init_from_file("src/shaders/vertex.glsl", "src/shaders/fragment.glsl")
+    m_DefaultShader = shader_init_from_file("src/shaders/block_renderer_vertex.glsl", "src/shaders/block_renderer_fragment.glsl")
     compile_shaders(&m_DefaultShader)
     
     m_BlockAtlas = texture_init_from_file("src/resources/block_atlas.png")

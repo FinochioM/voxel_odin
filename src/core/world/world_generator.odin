@@ -21,7 +21,8 @@ init_world_noise :: proc() {
 
     _world_noise_init = true
 
-    seed := u64(time.to_unix_nanoseconds(time.now()))
+    //seed := u64(time.to_unix_nanoseconds(time.now()))
+    seed : u64 = 1569
     _world_rng = ut.random_init(seed)
 
     noise_seed := ut.random_int(&_world_rng, 4000)
@@ -49,12 +50,12 @@ generate_chunk :: proc(chunk: ^co.Chunk) {
     for x := 0; x < ut.ChunkSizeX; x += 1 {
         for z := 0; z < ut.ChunkSizeZ; z += 1 {
             generated_x = f32(x)
-            generated_y = (_world_height_map[x][z] / 2 + 1) * (ut.ChunkSizeY - 32)
+            generated_y = (_world_height_map[x][z] / 2 + 1.0) * (ut.ChunkSizeY - 32)
             generated_z = f32(z)
 
             set_vertical_blocks(chunk, int(generated_x), int(generated_z), int(generated_y))
             
-            if ut.random_int(&_world_rng, 100) % 100 == 7 && generated_x + ut.MaxStructureX < ut.ChunkSizeX && generated_y + ut.MaxStructureY < ut.ChunkSizeY && generated_z + ut.MaxStructureZ < ut.ChunkSizeZ {
+            if ut.random_uint(&_world_rng, 75) == 7 && generated_x + ut.MaxStructureX < ut.ChunkSizeX && generated_y + ut.MaxStructureY < ut.ChunkSizeY && generated_z + ut.MaxStructureZ < ut.ChunkSizeZ {
                 fillin_world_structure(chunk, &tree_structure.base, i32(generated_x), i32(generated_y) - 1, i32(generated_z))
             }
         }

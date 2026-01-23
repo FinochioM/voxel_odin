@@ -79,6 +79,9 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
 
     v1, v2, v3, v4, v5, v6 : Vertex
 
+    // top, bot, front, back, left, right
+    lighting_levels : [6]f32 = {1.0, 0.2, 0.6, 0.7, 0.6, 0.7}
+
     #partial switch (face_type) {
         case Block_Face_Type.top: {
             v1.position = (translation * m_TopFace[0]).xyz
@@ -87,6 +90,13 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
             v4.position = (translation * m_TopFace[2]).xyz
             v5.position = (translation * m_TopFace[3]).xyz
             v6.position = (translation * m_TopFace[0]).xyz
+
+            v1.lighting_level = lighting_levels[0]
+            v2.lighting_level = lighting_levels[0]
+            v3.lighting_level = lighting_levels[0]
+            v4.lighting_level = lighting_levels[0]
+            v5.lighting_level = lighting_levels[0]
+            v6.lighting_level = lighting_levels[0]
 
             break
         }
@@ -98,6 +108,13 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
             v5.position = (translation * m_BottomFace[3]).xyz
             v6.position = (translation * m_BottomFace[0]).xyz
 
+            v1.lighting_level = lighting_levels[1]
+            v2.lighting_level = lighting_levels[1]
+            v3.lighting_level = lighting_levels[1]
+            v4.lighting_level = lighting_levels[1]
+            v5.lighting_level = lighting_levels[1]
+            v6.lighting_level = lighting_levels[1]
+
             break
         }
         case Block_Face_Type.front: {
@@ -107,6 +124,13 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
             v4.position = (translation * m_ForwardFace[2]).xyz
             v5.position = (translation * m_ForwardFace[3]).xyz
             v6.position = (translation * m_ForwardFace[0]).xyz
+
+            v1.lighting_level = lighting_levels[2]
+            v2.lighting_level = lighting_levels[2]
+            v3.lighting_level = lighting_levels[2]
+            v4.lighting_level = lighting_levels[2]
+            v5.lighting_level = lighting_levels[2]
+            v6.lighting_level = lighting_levels[2]
 
             break
         }
@@ -118,6 +142,13 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
             v5.position = (translation * m_BackFace[3]).xyz
             v6.position = (translation * m_BackFace[0]).xyz
 
+            v1.lighting_level = lighting_levels[3]
+            v2.lighting_level = lighting_levels[3]
+            v3.lighting_level = lighting_levels[3]
+            v4.lighting_level = lighting_levels[3]
+            v5.lighting_level = lighting_levels[3]
+            v6.lighting_level = lighting_levels[3]
+
             break
         }
         case Block_Face_Type.left: {
@@ -128,6 +159,13 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
             v5.position = (translation * m_LeftFace[3]).xyz
             v6.position = (translation * m_LeftFace[0]).xyz
 
+            v1.lighting_level = lighting_levels[4]
+            v2.lighting_level = lighting_levels[4]
+            v3.lighting_level = lighting_levels[4]
+            v4.lighting_level = lighting_levels[4]
+            v5.lighting_level = lighting_levels[4]
+            v6.lighting_level = lighting_levels[4]
+
             break
         }
         case Block_Face_Type.right: {
@@ -137,6 +175,13 @@ chunk_mesh_add_face :: proc(cm: ^Chunk_Mesh, face_type: Block_Face_Type, positio
             v4.position = (translation * m_RightFace[2]).xyz
             v5.position = (translation * m_RightFace[3]).xyz
             v6.position = (translation * m_RightFace[0]).xyz
+
+            v1.lighting_level = lighting_levels[5]
+            v2.lighting_level = lighting_levels[5]
+            v3.lighting_level = lighting_levels[5]
+            v4.lighting_level = lighting_levels[5]
+            v5.lighting_level = lighting_levels[5]
+            v6.lighting_level = lighting_levels[5]
 
             break
         }
@@ -182,8 +227,10 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
 
                     if z <= 0 {
                         chunk_mesh_add_face(cm, Block_Face_Type.backward, world_position, chunk[x][y][z].p_BlockType)
+                        chunk_mesh_add_face(cm, Block_Face_Type.front, world_position, chunk[x][y][z].p_BlockType)
                     } else if z >= ChunkSizeZ - 1 {
-                        chunk_mesh_add_face(cm, Block_Face_Type.front, world_position, chunk[x][y][z].p_BlockType)    
+                        chunk_mesh_add_face(cm, Block_Face_Type.front, world_position, chunk[x][y][z].p_BlockType)
+                        chunk_mesh_add_face(cm, Block_Face_Type.backward, world_position, chunk[x][y][z].p_BlockType)    
                     } else {
                         if chunk[x][y][z + 1].p_BlockType == Block_Type.Air {
                             chunk_mesh_add_face(cm, Block_Face_Type.front, world_position, chunk[x][y][z].p_BlockType)    
@@ -196,8 +243,10 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
 
                     if x <= 0 {
                         chunk_mesh_add_face(cm, Block_Face_Type.left, world_position, chunk[x][y][z].p_BlockType)
+                        chunk_mesh_add_face(cm, Block_Face_Type.right, world_position, chunk[x][y][z].p_BlockType)
                     } else if x >= ChunkSizeX - 1 {
                         chunk_mesh_add_face(cm, Block_Face_Type.right, world_position, chunk[x][y][z].p_BlockType)
+                        chunk_mesh_add_face(cm, Block_Face_Type.left, world_position, chunk[x][y][z].p_BlockType)
                     } else {
                         if chunk[x + 1][y][z].p_BlockType == Block_Type.Air {
                             chunk_mesh_add_face(cm, Block_Face_Type.right, world_position, chunk[x][y][z].p_BlockType)
@@ -209,9 +258,11 @@ chunk_mesh_construct_mesh :: proc(cm: ^Chunk_Mesh, chunk: ^[ut.ChunkSizeX][ut.Ch
                     }
 
                     if y <= 0 {
-                        chunk_mesh_add_face(cm, Block_Face_Type.bottom, world_position, chunk[x][y][z].p_BlockType)                    
+                        chunk_mesh_add_face(cm, Block_Face_Type.bottom, world_position, chunk[x][y][z].p_BlockType)  
+                        chunk_mesh_add_face(cm, Block_Face_Type.top, world_position, chunk[x][y][z].p_BlockType)                   
                     } else if y >= ChunkSizeY - 1 {
                         chunk_mesh_add_face(cm, Block_Face_Type.top, world_position, chunk[x][y][z].p_BlockType)   
+                        chunk_mesh_add_face(cm, Block_Face_Type.bottom, world_position, chunk[x][y][z].p_BlockType)  
                     } else {
                         if chunk[x][y - 1][z].p_BlockType == Block_Type.Air {
                             chunk_mesh_add_face(cm, Block_Face_Type.bottom, world_position, chunk[x][y][z].p_BlockType)

@@ -28,3 +28,11 @@ random_int :: proc(r: ^Random, limit: int) -> int {
     v := rand.uint32(r.gen)
     return int(v % u32(limit))
 }
+
+random_uint :: proc(r: ^Random, limit: u32) -> u32 {
+    if limit <= 0 {
+        return 0
+    }
+    v := rand.uint32(r.gen)
+    return u32(v % u32(limit))
+}
