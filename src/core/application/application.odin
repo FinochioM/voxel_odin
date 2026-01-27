@@ -7,7 +7,6 @@ import opcl "../../opengl_classes"
 
 import "vendor:glfw"
 import op "vendor:OpenGL"
-
 import "core:fmt"
 
 WIDTH :: 1280

@@ -23,6 +23,7 @@ World :: struct {
     m_Renderer: re.Renderer,
     m_ChunkCount: i32,
     m_WorldChunks: map[int]map[int]^co.Chunk,
+    m_WorldSkybox: Skybox,
 }
 
 world_init :: proc(w: ^World) {
@@ -66,6 +67,8 @@ world_init :: proc(w: ^World) {
     }
 
     ut.log_to_console("ended chunk mesh construction")
+
+    w.m_WorldSkybox = skybox_init()
 }
 
 world_destroy :: proc() {}
@@ -76,7 +79,7 @@ world_on_update :: proc(w: ^World, window: glfw.WindowHandle) {
     camera_speed :: 0.35
 
     if glfw.GetKey(window, glfw.KEY_ESCAPE) == glfw.PRESS {
-        glfw.SetWindowShouldClose(window, true)
+        glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
     }
 
     if glfw.GetKey(window, glfw.KEY_W) == glfw.PRESS {
@@ -132,6 +135,8 @@ world_render_world :: proc(w: ^World) {
     world_render_chunk_from_map(w, player_chunk_x - 1, player_chunk_z - 1)
     world_render_chunk_from_map(w, player_chunk_x - 1, player_chunk_z + 1)
     */
+
+    skybox_render(&w.m_WorldSkybox, &w.p_Player.p_Camera)
 
     render_distance_x, render_distance_z := 4, 4
 

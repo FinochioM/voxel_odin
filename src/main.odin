@@ -4,7 +4,6 @@ import app "core/application"
 
 import "vendor:glfw"
 
-
 main :: proc() {
     using app
 

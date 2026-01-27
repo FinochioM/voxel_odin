@@ -16,6 +16,8 @@ Camera :: struct {
     m_ViewMatrix : m.mat4,
     m_ProjectionMatrix : m.mat4,
     m_ViewProjectionMatrix : m.mat4,
+    
+    state: Camera_State,
 }
 
 Camera_State :: struct {
@@ -45,11 +47,12 @@ cam_state_init :: proc() -> Camera_State {
     return cm
 }
 
-CM := cam_state_init()
-
 camera_init :: proc(fov, aspect, zNear, zFar: f32) -> Camera {
+    context = runtime.default_context()
     c : Camera
     using c, m
+
+    state = cam_state_init()
 
     m_Fov = fov
     m_Aspect = aspect
@@ -110,36 +113,38 @@ camera_update_on_movement :: proc(c: ^Camera, xpos, ypos: f64) {
    
     y = -y
 
-    x_diff := x - CM.prev_mx
-    y_diff := y - CM.prev_my
+    st := &c.state
 
-    if CM.first_move == false {
-        CM.first_move = true
-        CM.prev_mx = x
-        CM.prev_my = y
+    x_diff := x - st.prev_mx
+    y_diff := y - st.prev_my
+
+    if st.first_move == false {
+        st.first_move = true
+        st.prev_mx = x
+        st.prev_my = y
     }
 
-    x_diff = x_diff * CM.sens
-    y_diff = y_diff * CM.sens
+    x_diff = x_diff * st.sens
+    y_diff = y_diff * st.sens
 
-    CM.prev_mx = x
-    CM.prev_my = y
+    st.prev_mx = x
+    st.prev_my = y
 
-    CM.yaw = CM.yaw + x_diff
-    CM.pitch = CM.pitch + y_diff
+    st.yaw = st.yaw + x_diff
+    st.pitch = st.pitch + y_diff
 
-    if CM.pitch > 89.0 {
-        CM.pitch = 89.0
+    if st.pitch > 89.0 {
+        st.pitch = 89.0
     }
 
-    if CM.pitch < -89.0 {
-        CM.pitch = -89.0
+    if st.pitch < -89.0 {
+        st.pitch = -89.0
     }
 
     front : vec3
 
-    pitch_r := deg_to_rad(CM.pitch)
-    yaw_r := deg_to_rad(CM.yaw)
+    pitch_r := deg_to_rad(st.pitch)
+    yaw_r := deg_to_rad(st.yaw)
 
     front.x = cos(pitch_r) * cos(yaw_r)
     front.y = sin(pitch_r)
@@ -250,6 +255,16 @@ get_up :: proc(c: ^Camera) -> m.vec3 {
 
 get_right :: proc(c: ^Camera) -> m.vec3 {
     return m.normalize_vec3(m.cross_vec3(c.m_Front, c.m_Up))
+}
+
+get_skybox_view_projection :: proc(c: ^Camera) -> m.mat4 {
+    using m
+
+    view := c.m_ViewMatrix
+
+    view_no_translate := mat4(mat3(view))
+
+    return c.m_ProjectionMatrix * view_no_translate
 }
 
 // helper
